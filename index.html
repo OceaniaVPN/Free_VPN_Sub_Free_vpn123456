@@ -10,13 +10,11 @@
 :root{color-scheme:dark;--bg:#090d12;--line:rgba(210,225,241,.11);--line2:rgba(210,225,241,.19);--text:#f3f6f8;--muted:#9aa7b7;--subtle:#647184;--accent:#e6a06a;--accent2:#f0c184;--rgb:230,160,106;--ink:#1d120b;--glow:rgba(230,160,106,.16);--shadow:0 28px 90px rgba(0,0,0,.34)}
 html[data-season=spring]{--accent:#a7e58c;--accent2:#d1f2a7;--rgb:167,229,140;--ink:#101b10;--glow:rgba(167,229,140,.17)}html[data-season=summer]{--accent:#f4cb76;--accent2:#ffe5a3;--rgb:244,203,118;--ink:#211707;--glow:rgba(244,203,118,.18)}html[data-season=winter]{--accent:#9bd5f2;--accent2:#c8edff;--rgb:155,213,242;--ink:#0c1a22;--glow:rgba(155,213,242,.17)}
 
-.snowfall{position:fixed;inset:0;z-index:30;overflow:hidden;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .5s}
-html[data-season=winter] .snowfall{opacity:.88;visibility:visible}
-.snowfall i{position:absolute;top:0;left:var(--x);display:block;width:var(--size);height:var(--size);border-radius:50%;background:rgba(239,249,255,var(--alpha));box-shadow:0 0 7px rgba(150,211,245,.72),0 0 15px rgba(133,207,255,.32);filter:blur(var(--blur));opacity:0;animation:subscription-snowfall var(--duration) linear var(--delay) infinite,subscription-sway var(--sway-duration) ease-in-out var(--sway-delay) infinite alternate;will-change:transform,margin-left}
-.snowfall i.crystal{width:auto;height:auto;border-radius:0;background:none;filter:none;color:#eaf8ff;font-size:var(--crystal-size);line-height:1;text-shadow:0 0 8px rgba(133,207,255,.9),0 0 16px rgba(133,207,255,.5)}
-@keyframes subscription-snowfall{0%{transform:translate3d(0,-12vh,0) rotate(0deg);opacity:0}8%{opacity:var(--alpha)}92%{opacity:var(--alpha)}100%{transform:translate3d(0,112vh,0) rotate(var(--spin));opacity:0}}
-@keyframes subscription-sway{0%{margin-left:var(--drift-left)}100%{margin-left:var(--drift-right)}}
-@media(prefers-reduced-motion:reduce){.snowfall{display:block!important;opacity:.88!important;visibility:visible!important}}
+.weather-layer{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+.weather-live{position:absolute;left:0;top:0;display:block;line-height:1;white-space:nowrap;pointer-events:none;user-select:none;will-change:transform}
+.weather-live-snow{color:#e7f7ff;text-shadow:0 0 8px rgba(155,213,242,.92),0 0 17px rgba(133,207,255,.58)}
+.weather-live-ground{background:linear-gradient(to top,rgba(218,242,255,.32),rgba(218,242,255,0));box-shadow:0 -4px 16px rgba(190,228,255,.12)}
+.topbar,.wrap,.footer{position:relative;z-index:2}
 html[data-season=winter] .core{background:radial-gradient(circle at 28% 18%,#f8fdff 0,#dff4ff 23%,#9bd5f2 67%,#4e9ec9 100%);box-shadow:0 0 95px rgba(106,190,245,.5),inset 0 2px 2px rgba(255,255,255,.85),inset 0 -16px 28px rgba(12,43,64,.28)}
 html[data-season=winter] .pill{border-color:rgba(155,213,242,.52);background:rgba(112,190,232,.17);color:#c8edff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;overflow-x:hidden;color:var(--text);background:radial-gradient(ellipse at 13% 1%,var(--glow),transparent 31%),radial-gradient(ellipse at 88% 17%,rgba(103,132,178,.12),transparent 28%),radial-gradient(ellipse at 50% 70%,rgba(72,104,119,.07),transparent 42%),var(--bg);font:14px/1.65 Manrope,system-ui,sans-serif}
@@ -38,7 +36,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 </style>
 </head>
 <body>
-<div class="snowfall" aria-hidden="true"></div>
+<div class="weather-layer" id="weather-layer" aria-hidden="true"></div>
 <header class="topbar wrap"><a class="brand" href="/" aria-label="STEKLOVPN PLUS — главная"><span class="brand-mark">S</span><span class="brand-name">STEKLO<span>VPN</span> PLUS</span></a><nav class="nav" aria-label="Навигация"><a href="#subscription">ПОДПИСКА</a><a href="#setup">КАК ПОДКЛЮЧИТЬ</a><a href="https://github.com/OceaniaVPN/Free_VPN_Sub_Free_vpn123456" target="_blank" rel="noopener">GITHUB ↗</a></nav></header>
 <main class="wrap">
 <section class="hero"><div><div class="eyebrow">ПОДПИСКА STEKLOVPN · PLUS</div><h1>ТВОЯ СЕТЬ.<br><span class="gradient">ТВОЙ КОНФИГ.</span></h1><p class="hero-copy">Единая ссылка на актуальную конфигурацию STEKLOVPN. Добавь её в совместимое приложение один раз — обновления файла будут публиковаться по тому же адресу.</p><div class="actions"><a class="btn btn-primary" href="#subscription">Открыть подписку <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn" href="https://steklo-vpn-official-store.apruxdomain.store/">Официальный сайт ↗</a></div><div class="footnote"><span class="dot"></span><span>Основной адрес · резервная копия на GitHub</span></div></div>
@@ -50,5 +48,171 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 </main>
 <footer class="footer wrap"><div><strong>STEKLOVPN PLUS</strong> · ПОДПИСКА</div><div>Основной домен · GitHub mirror</div></footer><div class="toast" id="toast" role="status" aria-live="polite">Ссылка скопирована</div>
 <script>
-(function(){var t={spring:["🌱","SPRING MODE"],summer:["☀️","SUMMER MODE"],autumn:["🍂","AUTUMN MODE"],winter:["❄️","WINTER MODE"]};function createSnow(){var layer=document.querySelector(".snowfall");if(!layer)return;function rnd(a,b){return a+Math.random()*(b-a)}var count=window.innerWidth<600?42:60;for(var i=0;i<count;i++){var f=document.createElement("i"),duration=rnd(16,34),center=rnd(-24,24),amplitude=rnd(12,46),direction=Math.random()<.5?-1:1;if(Math.random()<.14){f.className="crystal";f.textContent="✦";}f.style.setProperty("--x",rnd(0,100).toFixed(2)+"vw");f.style.setProperty("--size",rnd(2.5,6.8).toFixed(1)+"px");f.style.setProperty("--crystal-size",rnd(8,14).toFixed(1)+"px");f.style.setProperty("--alpha",rnd(.24,.76).toFixed(2));f.style.setProperty("--blur",rnd(0,.65).toFixed(2)+"px");f.style.setProperty("--duration",duration.toFixed(2)+"s");f.style.setProperty("--delay",(-rnd(0,duration)).toFixed(2)+"s");f.style.setProperty("--sway-duration",rnd(4,9).toFixed(2)+"s");f.style.setProperty("--sway-delay",(-rnd(0,9)).toFixed(2)+"s");f.style.setProperty("--drift-left",(center-direction*amplitude).toFixed(1)+"px");f.style.setProperty("--drift-right",(center+direction*amplitude).toFixed(1)+"px");f.style.setProperty("--spin",rnd(-540,540).toFixed(0)+"deg");layer.appendChild(f);}}createSnow();async function loadSeason(){try{var r=await fetch("/season.json",{cache:"no-store"});if(!r.ok)throw Error("season unavailable");var p=await r.json(),s=p.season;if(!t[s])throw Error("invalid season");document.documentElement.setAttribute("data-season",s);document.getElementById("season-emoji").textContent=t[s][0];document.getElementById("season-name").textContent=t[s][1];}catch(e){var s="winter";document.documentElement.setAttribute("data-season",s);document.getElementById("season-emoji").textContent=t[s][0];document.getElementById("season-name").textContent=t[s][1];}}loadSeason();var toast=document.getElementById("toast"),timer;function message(v){toast.textContent=v;toast.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){toast.classList.remove("show");},2200);}document.getElementById("copy-link").addEventListener("click",async function(){var v=document.getElementById("subscription-url").textContent;try{await navigator.clipboard.writeText(v);message("Ссылка скопирована");}catch(e){var a=document.createElement("textarea");a.value=v;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();message("Ссылка скопирована");}});async function status(){try{var r=await Promise.all([fetch("/subscription-meta.json",{cache:"no-store"}),fetch("/configs/okeania_auto.txt",{cache:"no-store"})]);if(!r[0].ok||!r[1].ok)throw Error();var meta=await r[0].json(),cfg=await r[1].json();document.getElementById("profile-count").textContent=Array.isArray(cfg)?String(cfg.length):"—";document.getElementById("feed-state").textContent="АКТУАЛЕН";document.getElementById("feed-badge").textContent="ONLINE FEED";var d=meta.updatedAt?new Date(meta.updatedAt):null;document.getElementById("updated-at").textContent=d&&!isNaN(d.getTime())?d.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit"}):"—";}catch(e){document.getElementById("feed-state").textContent="НЕТ СВЯЗИ";document.getElementById("feed-badge").textContent="FEED ERROR";document.getElementById("profile-count").textContent="—";}}status();})();
+(function(){
+  var t={spring:["🌱","SPRING MODE"],summer:["☀️","SUMMER MODE"],autumn:["🍂","AUTUMN MODE"],winter:["❄️","WINTER MODE"]};
+  var weatherFrame=0,weatherCleanup=null;
+
+  function makeWeather(season){
+    if(weatherCleanup){weatherCleanup();weatherCleanup=null;}
+    var layer=document.getElementById("weather-layer");
+    if(!layer)return;
+    if(weatherFrame)cancelAnimationFrame(weatherFrame);
+    weatherFrame=0;layer.replaceChildren();layer.setAttribute("aria-hidden","true");
+    var reduced=Boolean(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var mobile=window.innerWidth<640;
+    var cap=reduced?(mobile?26:40):(mobile?34:54);
+    var spawnRate=mobile?1.2:1.9;
+    var active=[],settled=[],cell=28,width=0,height=0,pile=[],last=0,spawn=0,elapsed=0,ground=null;
+    layer.style.zIndex="1";layer.style.pointerEvents="none";
+    function resize(){
+      width=window.innerWidth;height=window.innerHeight;
+      pile=new Array(Math.ceil(width/cell)+2).fill(0);
+      if(ground)ground.style.height=(season==="winter"?Math.max(7,...pile):0)+"px";
+    }
+    resize();
+    function groundY(x){var index=Math.max(0,Math.min(pile.length-1,Math.floor(x/cell)));return height-pile[index];}
+    function chooseKind(){
+      if(season==="winter")return "snow";
+      if(season==="spring")return "spring";
+      if(season==="summer")return "summer";
+      return Math.random()<.96?"leaf":"rain";
+    }
+    function iconFor(kind){
+      var icons={snow:["❄","❅","✳"],leaf:["🍂","🍁"],spring:["🌸","🌷","✿"],summer:["✦","✧","☀"],rain:[""]};
+      var choices=icons[kind]||icons.snow;return choices[Math.floor(Math.random()*choices.length)];
+    }
+    function buildNode(kind,size,opacity){
+      var node=document.createElement("span");
+      node.className="weather-live weather-live-"+kind;
+      node.textContent=iconFor(kind);node.style.fontSize=size+"px";node.style.opacity=String(opacity);
+      node.style.position="absolute";node.style.left="0";node.style.top="0";
+      node.style.lineHeight="1";node.style.whiteSpace="nowrap";node.style.pointerEvents="none";
+      node.style.userSelect="none";node.style.willChange="transform";
+      return node;
+    }
+    function addParticle(initial){
+      if(active.length>=cap)return;
+      var kind=chooseKind(),size=kind==="snow"?11+Math.random()*10:kind==="rain"?10:19+Math.random()*12;
+      var node=buildNode(kind,size,kind==="snow"?.78+Math.random()*.22:.72+Math.random()*.28);
+      layer.append(node);
+      var p={kind:kind,node:node,x:Math.random()*width,y:initial?Math.random()*height*.82:-35-Math.random()*height*.25,
+        vx:(Math.random()-.5)*18,vy:reduced?17+Math.random()*12:22+Math.random()*17,
+        angle:Math.random()*360,spin:(Math.random()-.5)*(kind==="leaf"?180:kind==="spring"?110:70),
+        sway:kind==="leaf"?20+Math.random()*30:8+Math.random()*18,phase:Math.random()*Math.PI*2,size:size};
+      node.style.transform="translate3d("+p.x+"px,"+p.y+"px,0) rotate("+p.angle+"deg)";
+      active.push(p);
+    }
+    function settleParticle(p){
+      var index=Math.max(0,Math.min(pile.length-1,Math.floor(p.x/cell))),amount=p.kind==="snow"?2.2:2.5;
+      for(var offset=-1;offset<=1;offset++){var i=index+offset;if(i>=0&&i<pile.length)pile[i]=Math.min(p.kind==="snow"?64:34,pile[i]+amount*(offset===0?1:.46));}
+      p.y=groundY(p.x)-p.size*.56;p.node.classList.add("weather-live-settled");
+      p.node.style.opacity=p.kind==="leaf"?".88":".82";
+      p.node.style.transform="translate3d("+p.x+"px,"+p.y+"px,0) rotate("+p.angle+"deg)";
+      p.node.style.willChange="auto";settled.push(p);
+      if(settled.length>100){var old=settled.shift();old.node.remove();}
+    }
+    function frame(now){
+      if(document.hidden){last=now;weatherFrame=0;return;}
+      var dt=Math.min(.04,Math.max(0,(now-(last||now))/1000));
+      last=now;elapsed+=dt;spawn+=dt*spawnRate;
+      while(spawn>=1){addParticle(false);spawn-=1;}
+      var wind=(Math.sin(elapsed*.31)*18+Math.sin(elapsed*.13)*10)*(reduced?.38:1);
+      for(var i=active.length-1;i>=0;i--){
+        var p=active[i];p.phase+=dt;
+        p.vy=Math.min(p.vy+(p.kind==="snow"?8:p.kind==="rain"?95:25)*dt,reduced?42:68);
+        p.vx+=(wind+Math.sin(p.phase)*p.sway-p.vx)*dt*.18;
+        p.x+=p.vx*dt;p.y+=p.vy*dt;p.angle+=p.spin*dt;
+        if(p.x< -45)p.x=width+30;if(p.x>width+45)p.x=-30;
+        if(p.kind!=="rain"&&p.kind!=="summer"&&p.y+p.size*.6>=groundY(p.x)){
+          settleParticle(p);active.splice(i,1);continue;
+        }
+        if(p.y>height+45){p.node.remove();active.splice(i,1);continue;}
+        p.node.style.transform="translate3d("+p.x+"px,"+p.y+"px,0) rotate("+p.angle+"deg)";
+      }
+      if(ground){var peak=Math.max(0,...pile);ground.style.height=(season==="winter"?Math.min(64,peak+7):0)+"px";ground.style.opacity=season==="winter"?"1":"0";}
+      weatherFrame=requestAnimationFrame(frame);
+    }
+    ground=document.createElement("div");ground.className="weather-live-ground";
+    ground.style.position="absolute";ground.style.left="0";ground.style.right="0";ground.style.bottom="0";
+    ground.style.height="0";ground.style.pointerEvents="none";if(season==="winter")layer.append(ground);
+    var initialCount=Math.min(cap,mobile?20:30);
+    for(var i=0;i<initialCount;i++)addParticle(true);
+    var onResize=function(){resize();};
+    var onVisibility=function(){if(!document.hidden&&!weatherFrame){last=0;weatherFrame=requestAnimationFrame(frame);}};
+    window.addEventListener("resize",onResize,{passive:true});
+    document.addEventListener("visibilitychange",onVisibility);
+    weatherCleanup=function(){
+      window.removeEventListener("resize",onResize);document.removeEventListener("visibilitychange",onVisibility);
+      if(weatherFrame)cancelAnimationFrame(weatherFrame);weatherFrame=0;
+    };
+    weatherFrame=requestAnimationFrame(frame);
+  }
+
+  function initSceneMotion(){
+    var scene=document.querySelector(".scene");if(!scene)return;
+    var reduced=Boolean(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var speed=reduced?.55:1;
+    var rings=[
+      {node:scene.querySelector(".halo"),scale:.63,base:-27,speed:9.2},
+      {node:scene.querySelector(".halo.h2"),scale:.58,base:35,speed:-6.8},
+      {node:scene.querySelector(".halo.h3"),scale:.74,base:0,speed:14}
+    ].filter(function(item){return item.node;});
+    var core=scene.querySelector(".core");
+    var symbols=Array.from(scene.querySelectorAll(".scene-symbol"));
+    rings.forEach(function(item){item.node.style.setProperty("animation","none","important");item.node.style.transformOrigin="50% 50%";item.node.style.willChange="transform";});
+    if(core){core.style.setProperty("animation","none","important");core.style.transformOrigin="50% 50%";core.style.willChange="transform";}
+    var elapsed=0,previous=0;
+    function animate(now){
+      var dt=previous?Math.min(.05,(now-previous)/1000):0;previous=now;
+      if(!document.hidden)elapsed+=dt*speed;
+      rings.forEach(function(item){item.node.style.transform="scaleY("+item.scale+") rotate("+(item.base+item.speed*elapsed)+"deg)";});
+      if(core){var angle=-9+elapsed*12,lift=Math.sin(elapsed*.72)*6;core.style.transform="translateY("+lift+"px) rotate("+angle+"deg)";}
+      symbols.forEach(function(node,index){
+        var phase=elapsed*(.7+index*.13)+index*1.8;
+        node.style.transform="translateY("+Math.sin(phase)*5+"px) rotate("+Math.sin(phase*.7)*10+"deg)";
+        if(index===0)node.style.opacity=String(.65+.3*(.5+.5*Math.sin(phase*1.4)));
+      });
+      window.requestAnimationFrame(animate);
+    }
+    window.requestAnimationFrame(animate);
+  }
+
+  function applySeason(season){
+    if(!t[season])season="winter";
+    document.documentElement.setAttribute("data-season",season);
+    document.getElementById("season-emoji").textContent=t[season][0];
+    document.getElementById("season-name").textContent=t[season][1];
+    makeWeather(season);
+  }
+  async function loadSeason(){
+    try{var r=await fetch("/season.json",{cache:"no-store"});if(!r.ok)throw Error("season unavailable");
+      var p=await r.json();applySeason(p.season);
+    }catch(e){applySeason("winter");}
+  }
+  initSceneMotion();loadSeason();
+
+  var toast=document.getElementById("toast"),timer;
+  function message(v){toast.textContent=v;toast.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){toast.classList.remove("show");},2200);}
+  document.getElementById("copy-link").addEventListener("click",async function(){
+    var v=document.getElementById("subscription-url").textContent;
+    try{await navigator.clipboard.writeText(v);message("Ссылка скопирована");}
+    catch(e){var a=document.createElement("textarea");a.value=v;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();message("Ссылка скопирована");}
+  });
+  async function status(){
+    try{
+      var r=await Promise.all([fetch("/subscription-meta.json",{cache:"no-store"}),fetch("/configs/okeania_auto.txt",{cache:"no-store"})]);
+      if(!r[0].ok||!r[1].ok)throw Error();
+      var meta=await r[0].json(),cfg=await r[1].json();
+      document.getElementById("profile-count").textContent=Array.isArray(cfg)?String(cfg.length):"—";
+      document.getElementById("feed-state").textContent="АКТУАЛЕН";
+      document.getElementById("feed-badge").textContent="ONLINE FEED";
+      var d=meta.updatedAt?new Date(meta.updatedAt):null;
+      document.getElementById("updated-at").textContent=d&&!isNaN(d.getTime())?d.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit"}):"—";
+    }catch(e){
+      document.getElementById("feed-state").textContent="НЕТ СВЯЗИ";document.getElementById("feed-badge").textContent="FEED ERROR";
+      document.getElementById("profile-count").textContent="—";
+    }
+  }
+  status();
+})();
 </script></body></html>
