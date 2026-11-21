@@ -51,29 +51,28 @@ jobs:
               print("Validated and updated", len(parsed), "profiles.")
           PY
 
-      - name: Download the official STEKLOVPN season
+      - name: Read the season selected by the official STEKLOVPN site
         shell: bash
         run: |
           set -euo pipefail
-          SEASON_URL="https://steklo-vpn-official-store.apruxdomain.store/api/season"
-          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "$SEASON_URL?fresh=1" -o "$RUNNER_TEMP/season-response.json"
+          OFFICIAL_PAGE="https://raw.githubusercontent.com/OceaniaVPN/STEKLOVPN-Site/main/public/index.html"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "$OFFICIAL_PAGE" -o "$RUNNER_TEMP/official-index.html"
           python3 - <<'PY'
-          import json, os, pathlib
-          response = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) / "season-response.json").read_text())
-          allowed = {"spring", "summer", "autumn", "winter"}
-          season = response.get("season") if isinstance(response, dict) else None
-          if season not in allowed:
-              raise SystemExit("Official STEKLOVPN API returned an invalid season: " + repr(season))
+          import json, os, pathlib, re
+          html = (pathlib.Path(os.environ["RUNNER_TEMP"]) / "official-index.html").read_text(encoding="utf-8")
+          match = re.search(r'<html\b[^>]*\bdata-season=["\'](spring|summer|autumn|winter)["\']', html, re.IGNORECASE)
+          if not match:
+              raise SystemExit("Could not read a valid data-season from the official STEKLOVPN page")
+          season = match.group(1).lower()
           result = {
               "season": season,
-              "updatedAt": response.get("updatedAt"),
-              "source": "https://steklo-vpn-official-store.apruxdomain.store/api/season"
+              "source": "https://raw.githubusercontent.com/OceaniaVPN/STEKLOVPN-Site/main/public/index.html"
           }
           target = pathlib.Path("season.json")
           current = json.loads(target.read_text()) if target.exists() else None
           if current != result:
               target.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
-              print("Updated shared season:", season)
+              print("Updated shared season from official STEKLOVPN page:", season)
           else:
               print("Shared season is unchanged:", season)
           PY
