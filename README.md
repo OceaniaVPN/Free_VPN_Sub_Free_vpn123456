@@ -12,7 +12,7 @@ Static subscription page for STEKLOVPN, styled to match the official STEKLOVPN s
 
 The workflow at .github/workflows/sync-subscription.yml runs every 15 minutes and on manual dispatch. It:
 - Downloads and validates the JSON subscription from the StekloVPN source repository.
-- Reads the shared season from the official STEKLOVPN API at https://steklo-vpn-official-store.apruxdomain.store/api/season.
+- Reads `data-season` from the official STEKLOVPN page source (`STEKLOVPN-Site/public/index.html`) and publishes it as `season.json`.
 - Publishes the feed and season.json to this repository only when values change.
 
 The page reads season.json; it does not calculate the season from the visitor's device date.
