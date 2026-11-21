@@ -1,4 +1,4 @@
-name: Sync subscription feed
+name: Sync subscription and shared season
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-subscription-feed
+  group: sync-subscription-and-season
   cancel-in-progress: false
 
 jobs:
@@ -20,7 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Download and validate upstream config
+
+      - name: Download and validate upstream subscription
         shell: bash
         run: |
           set -euo pipefail
@@ -37,7 +38,6 @@ jobs:
           current = target.read_bytes() if target.exists() else None
           if current == data:
               print("Subscription is unchanged.")
-              pathlib.Path("/tmp/subscription_changed").write_text("no")
           else:
               target.write_bytes(data)
               meta = {
@@ -48,19 +48,46 @@ jobs:
                   "sha256": hashlib.sha256(data).hexdigest()
               }
               pathlib.Path("subscription-meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
-              pathlib.Path("/tmp/subscription_changed").write_text("yes")
               print("Validated and updated", len(parsed), "profiles.")
           PY
-      - name: Commit updated subscription
+
+      - name: Download the official STEKLOVPN season
         shell: bash
         run: |
           set -euo pipefail
-          if [ "$(cat /tmp/subscription_changed)" = "yes" ]; then
+          SEASON_URL="https://steklo-vpn-official-store.apruxdomain.store/api/season"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "\${SEASON_URL}?fresh=1" -o "$RUNNER_TEMP/season-response.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          response = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) / "season-response.json").read_text())
+          allowed = {"spring", "summer", "autumn", "winter"}
+          season = response.get("season") if isinstance(response, dict) else None
+          if season not in allowed:
+              raise SystemExit("Official STEKLOVPN API returned an invalid season: " + repr(season))
+          result = {
+              "season": season,
+              "updatedAt": response.get("updatedAt"),
+              "source": "https://steklo-vpn-official-store.apruxdomain.store/api/season"
+          }
+          target = pathlib.Path("season.json")
+          current = json.loads(target.read_text()) if target.exists() else None
+          if current != result:
+              target.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+              print("Updated shared season:", season)
+          else:
+              print("Shared season is unchanged:", season)
+          PY
+
+      - name: Commit changed feed, metadata and season
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add configs/okeania_auto.txt subscription-meta.json season.json
+          if git diff --cached --quiet; then
+            echo "No changes to publish."
+          else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add configs/okeania_auto.txt subscription-meta.json
-            git commit -m "Sync STEKLOVPN subscription"
+            git commit -m "Sync STEKLOVPN subscription and season"
             git push
-          else
-            echo "No upstream changes; nothing to commit."
           fi
