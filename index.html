@@ -34,6 +34,84 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 @media(prefers-reduced-motion:reduce){html[data-season=winter] .snowfall i{animation:subscription-snowfall var(--duration) linear var(--delay) infinite,subscription-sway var(--sway-duration) ease-in-out var(--sway-delay) infinite alternate!important;}}
 </style>
+<style id="subscription-orbit-animation-fix">
+/* CSS-only орбиты и мерцание; работает независимо от системного reduce-motion */
+@keyframes subscription-orbit-outer {
+  from { transform:scaleY(.63) rotate(-27deg); }
+  to   { transform:scaleY(.63) rotate(333deg); }
+}
+@keyframes subscription-orbit-middle {
+  from { transform:scaleY(.58) rotate(35deg); }
+  to   { transform:scaleY(.58) rotate(395deg); }
+}
+@keyframes subscription-orbit-inner {
+  from { transform:scaleY(.74) rotate(0deg); }
+  to   { transform:scaleY(.74) rotate(360deg); }
+}
+@keyframes subscription-core-motion {
+  0%,100% { transform:translateY(0) rotate(-9deg); }
+  25% { transform:translateY(-7px) rotate(81deg); }
+  50% { transform:translateY(-12px) rotate(171deg); }
+  75% { transform:translateY(-6px) rotate(261deg); }
+}
+@keyframes subscription-star-one {
+  0%,100% { transform:translate3d(0,0,0) rotate(0deg) scale(.92); opacity:.68; }
+  50% { transform:translate3d(5px,-10px,0) rotate(22deg) scale(1.16); opacity:1; }
+}
+@keyframes subscription-star-two {
+  0%,100% { transform:translate3d(0,0,0) rotate(0deg); opacity:.55; }
+  50% { transform:translate3d(-6px,-8px,0) rotate(-18deg); opacity:1; }
+}
+@keyframes subscription-star-three {
+  0%,100% { transform:translate3d(0,0,0) scale(.8); opacity:.4; }
+  50% { transform:translate3d(0,-7px,0) scale(1.25); opacity:1; }
+}
+@keyframes subscription-pill-glow {
+  0%,100% { box-shadow:0 0 0 rgba(155,213,242,0); }
+  50% { box-shadow:0 0 22px rgba(155,213,242,.2); }
+}
+.scene .halo {
+  animation:subscription-orbit-outer 34s linear infinite!important;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.scene .halo.h2 {
+  animation:subscription-orbit-middle 46s linear infinite reverse!important;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.scene .halo.h3 {
+  animation:subscription-orbit-inner 27s linear infinite!important;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.scene .core {
+  animation:subscription-core-motion 24s ease-in-out infinite!important;
+  will-change:transform;
+}
+.scene .scene-symbol.one {
+  animation:subscription-star-one 7s ease-in-out infinite!important;
+  transform-origin:center;
+  will-change:transform,opacity;
+}
+.scene .scene-symbol.two {
+  animation:subscription-star-two 9s ease-in-out -2s infinite reverse!important;
+  will-change:transform,opacity;
+}
+.scene .scene-symbol.three {
+  animation:subscription-star-three 4.5s ease-in-out infinite!important;
+  will-change:transform,opacity;
+}
+.showcase .pill { animation:subscription-pill-glow 4s ease-in-out infinite!important; }
+@media(prefers-reduced-motion:reduce) {
+  .scene .halo,.scene .halo.h2,.scene .halo.h3,.scene .core,
+  .scene .scene-symbol.one,.scene .scene-symbol.two,.scene .scene-symbol.three,
+  .showcase .pill {
+    animation-duration:48s!important;
+    animation-iteration-count:infinite!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="weather-layer" id="weather-layer" aria-hidden="true"></div>
@@ -189,7 +267,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
       var p=await r.json();applySeason(p.season);
     }catch(e){applySeason("winter");}
   }
-  initSceneMotion();applySeason(document.documentElement.getAttribute('data-season')||'winter');loadSeason();
+  applySeason(document.documentElement.getAttribute('data-season')||'winter');loadSeason();
 
   var toast=document.getElementById("toast"),timer;
   function message(v){toast.textContent=v;toast.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){toast.classList.remove("show");},2200);}
