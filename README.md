@@ -4,23 +4,25 @@ Static subscription page for STEKLOVPN, styled to match the official STEKLOVPN s
 
 ## Addresses
 
-- Main page: https://sub-steklo-plus.apruxdomain.lol/
-- Main subscription URL: https://sub-steklo-plus.apruxdomain.lol/configs/okeania_auto.txt
+- Main page: https://sub-steklo-pluse.apruxdomain.shop/
+- Main subscription URL: https://sub-steklo-pluse.apruxdomain.shop/configs/okeania_auto.txt
 - GitHub raw mirror: https://raw.githubusercontent.com/OceaniaVPN/Free_VPN_Sub_Free_vpn123456/main/configs/okeania_auto.txt
 
-## Automatic sync
+## Automatic synchronization
 
-The workflow at .github/workflows/sync-subscription.yml checks the upstream file every 15 minutes and on manual dispatch. It validates JSON before replacing the hosted copy. If upstream data is unchanged, no commit is created.
+The workflow at .github/workflows/sync-subscription.yml runs every 15 minutes and on manual dispatch. It:
+- Downloads and validates the JSON subscription from the StekloVPN source repository.
+- Reads the shared season from the official STEKLOVPN API at https://steklo-vpn-official-store.apruxdomain.store/api/season.
+- Publishes the feed and season.json to this repository only when values change.
 
-Upstream:
-https://raw.githubusercontent.com/OceaniaVPN/StekloVPN/refs/heads/main/configs/okeania_auto.txt
+The page reads season.json; it does not calculate the season from the visitor's device date.
 
 ## GitHub Pages and DNS
 
 1. In repository Settings → Pages, select Deploy from a branch, branch main, folder / (root), then save.
-2. Set the custom domain to sub-steklo-plus.apruxdomain.lol in Pages settings.
+2. Set the custom domain to sub-steklo-pluse.apruxdomain.shop in the Pages settings.
 3. At the DNS provider, add a CNAME record:
-   - Name: sub-steklo-plus
+   - Name: sub-steklo-pluse
    - Target: oceaniavpn.github.io
 4. After GitHub verifies DNS and provisions HTTPS, enable Enforce HTTPS.
 
