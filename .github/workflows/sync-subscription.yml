@@ -56,7 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           SEASON_URL="https://steklo-vpn-official-store.apruxdomain.store/api/season"
-          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "\${SEASON_URL}?fresh=1" -o "$RUNNER_TEMP/season-response.json"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "$SEASON_URL?fresh=1" -o "$RUNNER_TEMP/season-response.json"
           python3 - <<'PY'
           import json, os, pathlib
           response = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) / "season-response.json").read_text())
