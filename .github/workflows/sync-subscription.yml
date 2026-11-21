@@ -1,0 +1,64 @@
+name: Sync subscription feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-subscription-feed
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download and validate upstream config
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_URL="https://raw.githubusercontent.com/OceaniaVPN/StekloVPN/refs/heads/main/configs/okeania_auto.txt"
+          mkdir -p configs
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 90 "$SOURCE_URL" -o "$RUNNER_TEMP/okeania_auto.txt"
+          python3 - <<'PY'
+          import datetime, hashlib, json, os, pathlib
+          data = (pathlib.Path(os.environ["RUNNER_TEMP"]) / "okeania_auto.txt").read_bytes()
+          parsed = json.loads(data)
+          if not isinstance(parsed, list) or not parsed:
+              raise SystemExit("Source config must be a non-empty JSON array")
+          target = pathlib.Path("configs/okeania_auto.txt")
+          current = target.read_bytes() if target.exists() else None
+          if current == data:
+              print("Subscription is unchanged.")
+              pathlib.Path("/tmp/subscription_changed").write_text("no")
+          else:
+              target.write_bytes(data)
+              meta = {
+                  "source": "https://raw.githubusercontent.com/OceaniaVPN/StekloVPN/refs/heads/main/configs/okeania_auto.txt",
+                  "updatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                  "sizeBytes": len(data),
+                  "profiles": len(parsed),
+                  "sha256": hashlib.sha256(data).hexdigest()
+              }
+              pathlib.Path("subscription-meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
+              pathlib.Path("/tmp/subscription_changed").write_text("yes")
+              print("Validated and updated", len(parsed), "profiles.")
+          PY
+      - name: Commit updated subscription
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(cat /tmp/subscription_changed)" = "yes" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add configs/okeania_auto.txt subscription-meta.json
+            git commit -m "Sync STEKLOVPN subscription"
+            git push
+          else
+            echo "No upstream changes; nothing to commit."
+          fi
