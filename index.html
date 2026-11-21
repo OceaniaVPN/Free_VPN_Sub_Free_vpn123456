@@ -189,7 +189,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
       var p=await r.json();applySeason(p.season);
     }catch(e){applySeason("winter");}
   }
-  initSceneMotion();loadSeason();
+  initSceneMotion();applySeason(document.documentElement.getAttribute('data-season')||'winter');loadSeason();
 
   var toast=document.getElementById("toast"),timer;
   function message(v){toast.textContent=v;toast.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){toast.classList.remove("show");},2200);}
