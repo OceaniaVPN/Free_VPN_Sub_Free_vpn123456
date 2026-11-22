@@ -1,0 +1,58 @@
+diff --git a/.github/workflows/sync-subscription.yml b/.github/workflows/sync-subscription.yml
+--- a/.github/workflows/sync-subscription.yml
++++ b/.github/workflows/sync-subscription.yml
+@@ -4,9 +4,9 @@
+   push:
+     branches: [main]
+   workflow_dispatch:
+   schedule:
+-    - cron: "0 * * * *"
++    - cron: "*/15 * * * *"
+ 
+ permissions:
+   contents: write
+ 
+@@ -50,31 +50,31 @@
+               pathlib.Path("subscription-meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
+               print("Validated and updated", len(parsed), "profiles.")
+           PY
+ 
+-      - name: Read the shared season from Proxy_sait
++      - name: Read the live shared season from the official STEKLOVPN Worker
+         shell: bash
+         run: |
+           set -euo pipefail
+-          SEASON_URL="https://raw.githubusercontent.com/OceaniaVPN/Proxy_sait/pages-migration/public/season.json"
++          SEASON_URL="https://steklo-vpn-official-store.apruxdomain.store/api/season?fresh=1"
+           curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 "$SEASON_URL" -o "$RUNNER_TEMP/season-response.json"
+           python3 - <<'PY'
+           import json, os, pathlib
+           response = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) / "season-response.json").read_text())
+           allowed = {"spring", "summer", "autumn", "winter"}
+           season = response.get("season") if isinstance(response, dict) else None
+           if season not in allowed:
+-              raise SystemExit("Proxy_sait returned an invalid season: " + repr(season))
++              raise SystemExit("Official STEKLOVPN Worker returned an invalid season: " + repr(season))
+           result = {
+               "season": season,
+               "updatedAt": response.get("updatedAt"),
+-              "source": "https://raw.githubusercontent.com/OceaniaVPN/Proxy_sait/pages-migration/public/season.json"
++              "source": "https://steklo-vpn-official-store.apruxdomain.store/api/season"
+           }
+           target = pathlib.Path("season.json")
+           current = json.loads(target.read_text()) if target.exists() else None
+           if current != result:
+               target.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+-              print("Updated shared season from Proxy_sait:", season)
++              print("Updated shared season from the official STEKLOVPN Worker:", season)
+           else:
+               print("Shared season is unchanged:", season)
+           PY
+ 
+
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1 +1 @@
+-- Reads `data-season` from the official STEKLOVPN page source (`STEKLOVPN-Site/public/index.html`) and publishes it as `season.json`.
++- Reads the current season from the official STEKLOVPN Worker endpoint (`/api/season`), which uses the shared D1 database, and publishes it as `season.json`.
