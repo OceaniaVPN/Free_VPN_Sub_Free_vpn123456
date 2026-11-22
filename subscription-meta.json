@@ -1,7 +1,7 @@
 {
   "source": "https://raw.githubusercontent.com/OceaniaVPN/StekloVPN/refs/heads/main/configs/okeania_auto.txt",
-  "updatedAt": "2026-11-22T09:40:20.865266+00:00",
-  "sizeBytes": 111420,
-  "profiles": 32,
-  "sha256": "2070a2594ba030b8f740af1e848212291b26bb7cb68a5d8729454560776484b9"
+  "updatedAt": "2026-11-22T17:42:46.821336+00:00",
+  "sizeBytes": 62151,
+  "profiles": 18,
+  "sha256": "b14bc687e5ec90a544a62fb17ca77b34ce250452af9ef7c91b07c560334e36be"
 }
